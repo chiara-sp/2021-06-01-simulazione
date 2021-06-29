@@ -5,10 +5,12 @@
 package it.polito.tdp.genes;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.genes.model.Genes;
 import it.polito.tdp.genes.model.Model;
+import it.polito.tdp.genes.model.Vicino;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -30,7 +32,7 @@ public class FXMLController {
     private Button btnCreaGrafo; // Value injected by FXMLLoader
 
     @FXML // fx:id="cmbGeni"
-    private ComboBox<?> cmbGeni; // Value injected by FXMLLoader
+    private ComboBox<Genes> cmbGeni; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnGeniAdiacenti"
     private Button btnGeniAdiacenti; // Value injected by FXMLLoader
@@ -46,19 +48,57 @@ public class FXMLController {
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
+    	txtResult.clear();
+    	txtResult.appendText("grafo creato\n");
+    	model.creaGrafo();
+    	txtResult.appendText("#vertici: "+model.getNumVertici()+ "\n");
+    	txtResult.appendText("#archi: "+model.getNumArchi()+"\n");
     	
+    	cmbGeni.getItems().clear();
+    	this.cmbGeni.getItems().addAll(model.getVertici());
 
     }
 
     @FXML
     void doGeniAdiacenti(ActionEvent event) {
 
+    	txtResult.clear();
+    	Genes g= cmbGeni.getValue();
+    	if(g==null) {
+    		txtResult.appendText("selezioanre gene e creare il grafo");
+    		return;
+    	}
+    	if(!model.grafoCreato()) {
+    		txtResult.appendText("creare prima il grafo");
+    		return;
+    	}
+    	for(Vicino v: model.getVicini(g)) {
+    		txtResult.appendText(v+"\n");
+    	}
     	
     }
 
     @FXML
     void doSimula(ActionEvent event) {
 
+    	txtResult.clear();
+    	Genes g= cmbGeni.getValue();
+    	if(g==null) {
+    		txtResult.appendText("selezioanre gene e creare il grafo");
+    		return;
+    	}
+    	int n;
+    	try {
+    		n= Integer.parseInt(this.txtIng.getText());
+    	}catch(NumberFormatException e) {
+    		txtResult.appendText("selezionare numerodi ingegneri");
+    		return;
+    	}
+    	Map<Genes, Integer> res= model.simula(n, g);
+    	for(Genes gene: res.keySet()) {
+    		txtResult.appendText(gene+ " studiato da "+ res.get(gene)+"\n");
+    	}
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
